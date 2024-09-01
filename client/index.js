@@ -21,7 +21,8 @@ xhr.open("GET", "http://localhost:5000", true);
 xhr.onload = () => {
   const data = JSON.parse(xhr.response);
 
-  const pools = data.pools;
+  const { pools, rounds, ranking, mainStage, medals } = data;
+
   pools.map((pool, index) => {
     const poolEl = document.importNode(poolTemplate.content, true);
     poolEl.querySelector("h1").textContent =
@@ -39,7 +40,7 @@ xhr.onload = () => {
     poolsWrapper.append(poolEl);
   });
 
-  Object.values(data.rounds).map((round, idx) => {
+  Object.values(rounds).map((round, idx) => {
     let roundEl = document.importNode(roundPairsTemplate.content, true);
 
     const heading = idx === 0 ? "I KOLO" : idx === 1 ? "II KOLO" : "III KOLO";
@@ -55,7 +56,7 @@ xhr.onload = () => {
     groupsWrapper.append(roundEl);
   });
 
-  Object.values(data.ranking).map((group) => {
+  Object.values(ranking).map((group) => {
     let tableEl = document.importNode(tableTemplate.content, true);
 
     group.map((team, index) => {
@@ -87,7 +88,7 @@ xhr.onload = () => {
     tablesWrapper.append(tableEl);
   });
 
-  data.mainStage.qf.map((match, index) => {
+  mainStage.qf.map((match, index) => {
     let qfEl = document.importNode(qfTemplate.content, true);
 
     qfEl.querySelector(
@@ -112,7 +113,7 @@ xhr.onload = () => {
     quarterfinalWrapper.append(qfEl);
   });
 
-  data.mainStage.sf.map((match, index) => {
+  mainStage.sf.map((match, index) => {
     let qfEl = document.importNode(qfTemplate.content, true);
     qfEl.querySelector(
       ".first-inner-mainstage-container .teamname"
@@ -158,7 +159,7 @@ xhr.onload = () => {
     finalsWrapper.append(finalEl);
   });
 
-  Object.values(data.medals).map((team, index) => {
+  Object.values(medals).map((team, index) => {
     let medalEl = document.importNode(medalsTemplate.content, true);
 
     const medalsHeaderEl = document.querySelector(".medals-container h2");
