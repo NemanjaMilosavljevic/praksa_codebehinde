@@ -22,13 +22,12 @@ module.exports = class PoolService {
   }
 
   static randomPoolPairPicker(firstPool, secondPool) {
-    const max = 2;
-    const randomNumFirst = Math.floor(Math.random() * max);
+    const randomNumFirst = Math.floor(Math.random() * 2);
     const firstTeamFromFirstPool = firstPool[randomNumFirst];
     const remainedTeamFromFirstPool =
       randomNumFirst === 0 ? firstPool[1] : firstPool[0];
 
-    const randomNumSecond = Math.floor(Math.random() * max);
+    const randomNumSecond = Math.floor(Math.random() * 2);
     const firstTeamFromSecondPool = secondPool[randomNumSecond];
     const remainedTeamFromSecondPool =
       randomNumSecond === 0 ? secondPool[1] : secondPool[0];
@@ -44,7 +43,10 @@ module.exports = class PoolService {
     );
 
     if (firstMatchWasPairedInGroups || secondMatchWasPairedInGroups) {
-      return this.randomPoolPairPicker(firstPool, secondPool);
+      return {
+        firstPair: [firstTeamFromFirstPool, remainedTeamFromSecondPool],
+        secondPair: [remainedTeamFromFirstPool, firstTeamFromSecondPool],
+      };
     }
 
     return {
