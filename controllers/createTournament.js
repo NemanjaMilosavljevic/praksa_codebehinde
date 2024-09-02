@@ -87,26 +87,20 @@ exports.createTournament = (req, res) => {
   const medals =
     EliminationPhaseService.showTeamsWithMedals(medalMatchesResults);
 
-  const outputData = {
+  const tournament = FormatOutputService.displayTournament(
+    groupAMatchResults,
+    groupBMatchResults,
+    groupCMatchResults,
     ranking,
-    rounds: FormatOutputService.formatGroupStageData(
-      groupAMatchResults,
-      groupBMatchResults,
-      groupCMatchResults
-    ),
-    pools: FormatOutputService.formatPool(
-      poolD.teams,
-      poolE.teams,
-      poolF.teams,
-      poolG.teams
-    ),
-    mainStage: FormatOutputService.formatMainStageData(
-      QFResults,
-      SFResults,
-      medalMatchesResults
-    ),
-    medals: FormatOutputService.formatMedalTeams(medals),
-  };
+    poolD.teams,
+    poolE.teams,
+    poolF.teams,
+    poolG.teams,
+    QFResults,
+    SFResults,
+    medalMatchesResults,
+    medals
+  );
 
-  res.end(JSON.stringify(outputData));
+  console.log(tournament);
 };
