@@ -14,6 +14,9 @@ let finalsWrapper = document.querySelector(".finals-container");
 let medalsWrapper = document.querySelector(".medals");
 let notFoundWrapper = document.querySelector(".not-found");
 
+let buttonEl = document.querySelector(".new-tournament");
+let clickButton;
+
 const xhr = new XMLHttpRequest();
 
 xhr.open("GET", "http://localhost:5000", true);
@@ -180,6 +183,9 @@ xhr.onload = () => {
 
     medalsWrapper.append(medalEl);
   });
+
+  clickButton = buttonEl.addEventListener("click", startNewTournament);
+  buttonEl.setAttribute("class", "new-tournament show");
 };
 
 xhr.onerror = () => {
@@ -197,3 +203,11 @@ xhr.onerror = () => {
 };
 
 xhr.send();
+
+const startNewTournament = (e) => {
+  e.preventDefault();
+
+  removeEventListener("click", clickButton);
+
+  window.location.reload();
+};

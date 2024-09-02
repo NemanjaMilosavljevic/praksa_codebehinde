@@ -266,3 +266,26 @@ h3:has(+ .finals-1) {
 .show {
   display: block;
 }
+
+.button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.new-tournament {
+  background-color: #bfe15d;
+  border-radius: 12px;
+  padding: 14px 36px;
+  margin-bottom: 5rem;
+  color: #1f253b;
+  outline: none;
+  border: none;
+  font-family: "Roboto";
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.new-tournament:hover {
+  cursor: pointer;
+  background-color: #c0e15dd2;
+}
