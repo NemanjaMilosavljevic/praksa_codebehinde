@@ -1,9 +1,35 @@
-const groups = require("../groups.json");
 const exibitions = require("../exibitions.json");
 
 module.exports = class TournamentStatisticService {
   static teamsStats;
+  static teamNames;
+  static teamISOCodes;
+  static teamRanks;
   constructor() {}
+
+  static getTeamNames() {
+    return this.teamNames;
+  }
+
+  static getTeamISOCodes() {
+    return this.teamISOCodes;
+  }
+
+  static getTeamRanks() {
+    return this.teamRanks;
+  }
+
+  static setTeamNames(data) {
+    this.teamNames = data;
+  }
+
+  static setTeamISOCodes(data) {
+    this.teamISOCodes = data;
+  }
+
+  static setTeamRanks(data) {
+    this.teamRanks = data;
+  }
 
   static getTeamsStats() {
     return this.teamsStats;
@@ -15,19 +41,23 @@ module.exports = class TournamentStatisticService {
 
   static getParticipantsDataByPropertyName(participantsData, target) {
     let participantsDataArray = [];
-    target in participantsData
-      ? participantsDataArray.push(participantsData[target])
-      : Object.values(participantsData).map((group) => {
-          group.forEach((element) => {
-            participantsDataArray.push(element[target]);
-          });
-        });
 
-    return participantsDataArray;
+    target.map((targetProperty) => {
+      targetProperty in participantsData
+        ? participantsDataArray.push(participantsData[targetProperty])
+        : Object.values(participantsData).map((group) => {
+            group.forEach((element) => {
+              participantsDataArray.push(element[targetProperty]);
+            });
+          });
+    });
+
+    this.setTeamNames(participantsDataArray.slice(0, 12));
+    this.setTeamISOCodes(participantsDataArray.slice(12, 24));
+    this.setTeamRanks(participantsDataArray.slice(24));
   }
 
   static isLuckDayToday() {
-    // faktor da li je nekom timu srecan dan
     const luckNumber = 7;
 
     const randomNumber = Math.floor(Math.random() * 100);
@@ -36,13 +66,9 @@ module.exports = class TournamentStatisticService {
   }
 
   static getWinningFactorByRanking(hostRank, guestRank) {
-    const minRankInTournament = Math.min(
-      ...this.getParticipantsDataByPropertyName(groups, "FIBARanking")
-    );
-    const maxRankInTournament = Math.max(
-      ...this.getParticipantsDataByPropertyName(groups, "FIBARanking")
-    );
-    const maxRankDiffInTournament = maxRankInTournament - minRankInTournament;
+    const teamRanks = this.getTeamRanks();
+
+    const maxRankDiffInTournament = Math.max(teamRanks) - Math.min(teamRanks);
 
     const rankDiff = hostRank - guestRank;
     const correlationFactorPerRankDiff = (50 / maxRankDiffInTournament).toFixed(
@@ -58,7 +84,6 @@ module.exports = class TournamentStatisticService {
       (50 + Math.abs(rankDiff) * correlationFactorPerRankDiff) / 100;
 
     if (Math.sign(rankDiff) === 1) {
-      //provera da li je pozitivan rezultat,ako jeste onda je domacin losijeg ranka
       chanceToWin = 1 - chanceToWin;
     }
 
@@ -122,138 +147,97 @@ module.exports = class TournamentStatisticService {
   }
 
   static getWinningFactorBasedOnTeamForm(hostForm, guestForm) {
-    if (hostForm === guestForm) {
-      return 0;
-    } else if (
-      (hostForm === "GREAT" && guestForm === "GOOD") ||
-      (hostForm === "GOOD" && guestForm === "BAD")
-    ) {
-      return 0.05;
-    } else if (hostForm === "GREAT" && guestForm === "BAD") {
-      return 0.1;
-    } else if (
-      (hostForm === "GOOD" && guestForm === "GREAT") ||
-      (hostForm === "BAD" && guestForm === "GOOD")
-    ) {
-      return -0.05;
-    } else {
-      return -0.1;
+    switch (true) {
+      case hostForm === guestForm:
+        return 0;
+      case (hostForm === "GREAT" && guestForm === "GOOD") ||
+        (hostForm === "GOOD" && guestForm === "BAD"):
+        return 0.05;
+      case hostForm === "GREAT" && guestForm === "BAD":
+        return 0.1;
+      case (hostForm === "GOOD" && guestForm === "GREAT") ||
+        (hostForm === "BAD" && guestForm === "GOOD"):
+        return -0.05;
+      default:
+        return -0.1;
     }
   }
 
   static updateTeamForm(hostData, guestData) {
-    if (
-      (hostData.status === "WIN" && hostData.currentForm === "GREAT") ||
-      (guestData.status === "WIN" && guestData.currentForm === "GREAT") ||
-      (hostData.status === "LOSE" && hostData.currentForm === "BAD") ||
-      (guestData.status === "LOSE" && guestData.currentForm === "BAD") ||
-      (hostData.status === "WIN" &&
-        hostData.currentForm === "GOOD" &&
-        guestData.currentForm === "BAD") ||
-      (guestData.status === "WIN" &&
-        guestData.currentForm === "GOOD" &&
-        hostData.currentForm === "BAD") ||
-      (hostData.status === "LOSE" &&
-        hostData.currentForm === "GOOD" &&
-        guestData.currentForm === "GREAT") ||
-      (guestData.status === "LOSE" &&
-        guestData.currentForm === "GOOD" &&
-        hostData.currentForm === "GREAT")
-    ) {
-      return;
-    }
-
-    if (
-      (hostData.status === "WIN" &&
+    switch (true) {
+      case (hostData.status === "WIN" &&
         hostData.currentForm === "BAD" &&
         hostData.basketsDiff < 20) ||
-      (hostData.status === "LOSE" &&
-        hostData.currentForm === "GREAT" &&
-        (guestData.currentForm === "BAD" || guestData.currentForm === "GOOD") &&
-        hostData.basketsDiff < 25) ||
-      (hostData.status === "LOSE" &&
-        hostData.currentForm === "GREAT" &&
-        guestData.currentForm === "GREAT" &&
-        hostData.basketsDiff < -10)
-    ) {
-      this.getTeamsStats()[hostData.team].currentForm = "GOOD";
-    }
+        (hostData.status === "LOSE" &&
+          hostData.currentForm === "GREAT" &&
+          (guestData.currentForm === "BAD" ||
+            guestData.currentForm === "GOOD") &&
+          hostData.basketsDiff < 25) ||
+        (hostData.status === "LOSE" &&
+          hostData.currentForm === "GREAT" &&
+          guestData.currentForm === "GREAT" &&
+          hostData.basketsDiff < -10):
+        return (this.getTeamsStats()[hostData.team].currentForm = "GOOD");
 
-    if (
-      (guestData.status === "WIN" &&
+      case (guestData.status === "WIN" &&
         guestData.currentForm === "BAD" &&
         guestData.basketsDiff < 20) ||
-      (guestData.status === "LOSE" &&
-        guestData.currentForm === "GREAT" &&
-        (hostData.currentForm === "BAD" || hostData.currentForm === "GOOD") &&
-        guestData.basketsDiff < 25) ||
-      (guestData.status === "LOSE" &&
-        guestData.currentForm === "GREAT" &&
-        hostData.currentForm === "GREAT" &&
-        guestData.basketsDiff < -10)
-    ) {
-      this.getTeamsStats()[guestData.team].currentForm = "GOOD";
-    }
+        (guestData.status === "LOSE" &&
+          guestData.currentForm === "GREAT" &&
+          (hostData.currentForm === "BAD" || hostData.currentForm === "GOOD") &&
+          guestData.basketsDiff < 25) ||
+        (guestData.status === "LOSE" &&
+          guestData.currentForm === "GREAT" &&
+          hostData.currentForm === "GREAT" &&
+          guestData.basketsDiff < -10):
+        return (this.getTeamsStats()[guestData.team].currentForm = "GOOD");
 
-    if (
-      (hostData.status === "WIN" &&
+      case (hostData.status === "WIN" &&
         hostData.currentForm === "GOOD" &&
         (guestData.currentForm === "GREAT" ||
           guestData.currentForm === "GOOD")) ||
-      (hostData.status === "WIN" &&
-        hostData.currentForm === "BAD" &&
-        hostData.basketsDiff > 20)
-    ) {
-      this.getTeamsStats()[hostData.team].currentForm = "GREAT";
-    }
+        (hostData.status === "WIN" &&
+          hostData.currentForm === "BAD" &&
+          hostData.basketsDiff > 20):
+        return (this.getTeamsStats()[hostData.team].currentForm = "GREAT");
 
-    if (
-      (guestData.status === "WIN" &&
+      case (guestData.status === "WIN" &&
         guestData.currentForm === "GOOD" &&
         (hostData.currentForm === "GREAT" ||
           hostData.currentForm === "GOOD")) ||
-      (guestData.status === "WIN" &&
-        guestData.currentForm === "BAD" &&
-        guestData.basketsDiff > 20)
-    ) {
-      this.getTeamsStats()[guestData.team].currentForm = "GREAT";
-    }
+        (guestData.status === "WIN" &&
+          guestData.currentForm === "BAD" &&
+          guestData.basketsDiff > 20):
+        return (this.getTeamsStats()[guestData.team].currentForm = "GREAT");
 
-    if (
-      (hostData.status === "LOSE" &&
+      case (hostData.status === "LOSE" &&
         hostData.currentForm === "GOOD" &&
         (guestData.currentForm === "BAD" ||
           guestData.currentForm === "GOOD")) ||
-      (hostData.status === "LOSE" &&
-        hostData.currentForm === "GREAT" &&
-        guestData.currentForm === "BAD" &&
-        hostData.basketsDiff > 25)
-    ) {
-      this.getTeamsStats()[hostData.team].currentForm = "BAD";
-    }
+        (hostData.status === "LOSE" &&
+          hostData.currentForm === "GREAT" &&
+          guestData.currentForm === "BAD" &&
+          hostData.basketsDiff > 25):
+        return (this.getTeamsStats()[hostData.team].currentForm = "BAD");
 
-    if (
-      (guestData.status === "LOSE" &&
+      case (guestData.status === "LOSE" &&
         guestData.currentForm === "GOOD" &&
         (hostData.currentForm === "BAD" || hostData.currentForm === "GOOD")) ||
-      (guestData.status === "LOSE" &&
-        guestData.currentForm === "GREAT" &&
-        hostData.currentForm === "BAD" &&
-        guestData.basketsDiff > 25)
-    ) {
-      this.getTeamsStats()[guestData.team].currentForm = "BAD";
+        (guestData.status === "LOSE" &&
+          guestData.currentForm === "GREAT" &&
+          hostData.currentForm === "BAD" &&
+          guestData.basketsDiff > 25):
+        return (this.getTeamsStats()[guestData.team].currentForm = "BAD");
+
+      default:
+        return;
     }
   }
 
   static getParticipantsStats() {
-    const teamsISOCodes = this.getParticipantsDataByPropertyName(
-      groups,
-      "ISOCode"
-    );
-    const teamsRanks = this.getParticipantsDataByPropertyName(
-      groups,
-      "FIBARanking"
-    );
+    const teamsISOCodes = this.getTeamISOCodes();
+    const teamsRanks = this.getTeamRanks();
+
     const statsBasedOnExibitions =
       this.getTeamsStatsBasedOnExibitions(exibitions);
 
@@ -282,20 +266,5 @@ module.exports = class TournamentStatisticService {
       SSD: teamsStats[10],
       PRI: teamsStats[11],
     });
-
-    return {
-      CAN: teamsStats[0],
-      AUS: teamsStats[1],
-      GRE: teamsStats[2],
-      ESP: teamsStats[3],
-      GER: teamsStats[4],
-      FRA: teamsStats[5],
-      BRA: teamsStats[6],
-      JPN: teamsStats[7],
-      USA: teamsStats[8],
-      SRB: teamsStats[9],
-      SSD: teamsStats[10],
-      PRI: teamsStats[11],
-    };
   }
 };
