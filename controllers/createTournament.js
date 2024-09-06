@@ -9,10 +9,14 @@ const TournamentStatisticService = require("../services/tournamentStatistic");
 const FormatOutputService = require("../services/formatOutput");
 
 exports.createTournament = (req, res) => {
-  const allTeams = TournamentStatisticService.getParticipantsDataByPropertyName(
-    groups,
-    "Team"
-  );
+  TournamentStatisticService.getParticipantsDataByPropertyName(groups, [
+    "Team",
+    "ISOCode",
+    "FIBARanking",
+  ]);
+  TournamentStatisticService.getParticipantsStats();
+
+  const allTeams = TournamentStatisticService.getTeamNames();
 
   const groupA = GroupService.createGroup("A", allTeams.slice(0, 4));
   const groupB = GroupService.createGroup("B", allTeams.slice(4, 8));

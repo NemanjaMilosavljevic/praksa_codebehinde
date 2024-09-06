@@ -166,15 +166,15 @@ module.exports = class FormatOutputService {
       };
     });
 
-    const quarterfinalOutput = quarterfinal.map((match, index) => {
+    const quarterfinalOutput = quarterfinal.map((match) => {
       return `${match.host} - ${match.guest} (${match.hostResult} : ${match.guestResult})`;
     });
 
-    const semifinalOutput = semifinal.map((match, index) => {
+    const semifinalOutput = semifinal.map((match) => {
       return `${match.host} - ${match.guest} (${match.hostResult} : ${match.guestResult})`;
     });
 
-    const medalMatchesOutput = medalMatches.map((match, index) => {
+    const medalMatchesOutput = medalMatches.map((match) => {
       return `${match.host} - ${match.guest} (${match.hostResult} : ${match.guestResult})`;
     });
 
