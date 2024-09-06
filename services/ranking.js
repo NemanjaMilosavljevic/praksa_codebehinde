@@ -12,13 +12,7 @@ module.exports = class RankingService {
       thirdTempGroup.push(team[2]);
     });
 
-    const allTeamsRanking = [
-      ...firstTempGroup,
-      ...secondTempGroup,
-      ...thirdTempGroup,
-    ];
-
-    allTeamsRanking.sort((a, b) => {
+    const sortedFirstGroup = firstTempGroup.sort((a, b) => {
       if (a.points < b.points) {
         return 1;
       }
@@ -43,6 +37,56 @@ module.exports = class RankingService {
       return 0;
     });
 
-    return allTeamsRanking;
+    const sortedSecondGroup = secondTempGroup.sort((a, b) => {
+      if (a.points < b.points) {
+        return 1;
+      }
+      if (a.points > b.points) {
+        return -1;
+      }
+
+      if (a.basketsDiff < b.basketsDiff) {
+        return 1;
+      }
+      if (a.basketsDiff > b.basketsDiff) {
+        return -1;
+      }
+
+      if (a.totalGivenBaskets < b.totalGivenBaskets) {
+        return 1;
+      }
+      if (a.totalGivenBaskets > b.totalGivenBaskets) {
+        return -1;
+      }
+
+      return 0;
+    });
+
+    const sortedThirdGroup = thirdTempGroup.sort((a, b) => {
+      if (a.points < b.points) {
+        return 1;
+      }
+      if (a.points > b.points) {
+        return -1;
+      }
+
+      if (a.basketsDiff < b.basketsDiff) {
+        return 1;
+      }
+      if (a.basketsDiff > b.basketsDiff) {
+        return -1;
+      }
+
+      if (a.totalGivenBaskets < b.totalGivenBaskets) {
+        return 1;
+      }
+      if (a.totalGivenBaskets > b.totalGivenBaskets) {
+        return -1;
+      }
+
+      return 0;
+    });
+
+    return [...sortedFirstGroup, ...sortedSecondGroup, ...sortedThirdGroup];
   }
 };
