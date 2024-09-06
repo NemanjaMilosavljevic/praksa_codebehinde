@@ -1,8 +1,6 @@
 const TournamentStatisticService = require("./tournamentStatistic");
 const GroupStageRules = require("./groupStageRules");
 
-const groups = require("../groups.json");
-
 module.exports = class ResultService {
   constructor() {}
 
@@ -14,14 +12,13 @@ module.exports = class ResultService {
         ? 1 - (1 - 2 * victoryFactor) / 10
         : 1;
 
-    //ako je srecan neki tim, pomeramo mu default granicu min/max za 8 kosa
     let max;
     let min;
     if (isLuckyToday) {
       max = teamAvgBaskets * 1.1 * formattedVictoryFactor + 8;
       min = teamAvgBaskets * 0.9 * formattedVictoryFactor + 8;
     }
-    // default state je avgBasket +- 10%
+
     max = teamAvgBaskets * 1.1 * formattedVictoryFactor;
     min = teamAvgBaskets * 0.9 * formattedVictoryFactor;
 
@@ -156,54 +153,35 @@ module.exports = class ResultService {
   }
 
   static groupStageResultHandler(pairs) {
-    const res = pairs.map((match) => {
-      const results = this.resultMatchHandler(
+    const results = pairs.map((match) => {
+      return this.resultMatchHandler(
         this.getTeamStatsByTeamName(match[0]),
         this.getTeamStatsByTeamName(match[1])
       );
-
-      return results;
     });
 
-    return res;
+    return results;
   }
 
   static getTeamStatsByTeamName(teamName) {
-    const teamsNames =
-      TournamentStatisticService.getParticipantsDataByPropertyName(
-        groups,
-        "Team"
-      );
-    const teamsISOCodes =
-      TournamentStatisticService.getParticipantsDataByPropertyName(
-        groups,
-        "ISOCode"
-      );
+    const teamNames = TournamentStatisticService.getTeamNames();
+    const teamISOCodes = TournamentStatisticService.getTeamISOCodes();
 
-    const targetedIndex = teamsNames.indexOf(teamName);
-    const targetedISOCode = teamsISOCodes[targetedIndex];
+    const targetedIndex = teamNames.indexOf(teamName);
+    const targetedISOCode = teamISOCodes[targetedIndex];
 
-    const participantsStats = TournamentStatisticService.getParticipantsStats();
+    const participantsStats = TournamentStatisticService.getTeamsStats();
 
     return participantsStats[targetedISOCode];
   }
 
   static getTeamNameByISOCode(ISOCode) {
-    const teamsNames =
-      TournamentStatisticService.getParticipantsDataByPropertyName(
-        groups,
-        "Team"
-      );
-    const teamsISOCodes =
-      TournamentStatisticService.getParticipantsDataByPropertyName(
-        groups,
-        "ISOCode"
-      );
+    const teamNames = TournamentStatisticService.getTeamNames();
+    const teamISOCodes = TournamentStatisticService.getTeamISOCodes();
 
-    const targetedIndex = teamsISOCodes.indexOf(ISOCode);
-    const targetedTeamName = teamsNames[targetedIndex];
+    const targetedIndex = teamISOCodes.indexOf(ISOCode);
 
-    return targetedTeamName;
+    return teamNames[targetedIndex];
   }
 
   static winCounter(groupStageData, teamName) {
@@ -240,12 +218,9 @@ module.exports = class ResultService {
   }
 
   static calculateGroupsStats(groupsResult) {
-    const teamNames =
-      TournamentStatisticService.getParticipantsDataByPropertyName(
-        groups,
-        "ISOCode"
-      );
-    const groupStats = teamNames.map((team, index) => {
+    const teamISOCodes = TournamentStatisticService.getTeamISOCodes();
+
+    const groupStats = teamISOCodes.map((team, index) => {
       const wins = this.winCounter(groupsResult, team);
       const { totalGivenBaskets, totalRecievedBaskets } = this.basketsCounter(
         groupsResult,
@@ -278,6 +253,7 @@ module.exports = class ResultService {
         })
         .flat();
     }
+
     return data
       .map((match) => {
         return Object.values(match)
