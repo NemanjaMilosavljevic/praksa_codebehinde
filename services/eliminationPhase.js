@@ -19,8 +19,10 @@ module.exports = class EliminationPhaseService {
   }
 
   static formSemifinalPairs(QFResults) {
-    const teamMovingToSemifinal =
-      ResultService.eliminationStageResultHandler(QFResults);
+    const teamMovingToSemifinal = ResultService.eliminationStageResultHandler(
+      QFResults,
+      "WIN"
+    );
 
     return {
       firstSemiPair: [teamMovingToSemifinal[0], teamMovingToSemifinal[1]],
@@ -45,11 +47,13 @@ module.exports = class EliminationPhaseService {
   }
 
   static formFinalAndMatchForThirdPlace(SFResults) {
-    const teamsMovingToFinal =
-      ResultService.eliminationStageResultHandler(SFResults);
+    const teamsMovingToFinal = ResultService.eliminationStageResultHandler(
+      SFResults,
+      "WIN"
+    );
     const teamsForThirdPlace = ResultService.eliminationStageResultHandler(
       SFResults,
-      "lose"
+      "LOSE"
     );
 
     return { final: teamsMovingToFinal, thirdPlace: teamsForThirdPlace };
@@ -73,11 +77,14 @@ module.exports = class EliminationPhaseService {
 
   static showTeamsWithMedals(finalAndThirdPlaceResults) {
     const winnersFromFinalAndThirdPlace =
-      ResultService.eliminationStageResultHandler(finalAndThirdPlaceResults);
+      ResultService.eliminationStageResultHandler(
+        finalAndThirdPlaceResults,
+        "WIN"
+      );
 
     const loserTeamInFinals = ResultService.eliminationStageResultHandler(
       finalAndThirdPlaceResults,
-      "lose"
+      "LOSE"
     )[0];
 
     return {

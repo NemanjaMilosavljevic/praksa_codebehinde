@@ -120,7 +120,7 @@ module.exports = class FormatOutputService {
     ];
 
     const output = pools.map((pool, index) => {
-      const pollName =
+      const poolName =
         index === 0
           ? "ŠEŠIR D"
           : index === 1
@@ -129,7 +129,7 @@ module.exports = class FormatOutputService {
           ? "ŠEŠIR F"
           : "ŠEŠIR G";
 
-      return `  ${pollName}
+      return `  ${poolName}
                       ${pool[0]}
                       ${pool[1]}
       `;

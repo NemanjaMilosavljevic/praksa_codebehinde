@@ -244,20 +244,12 @@ module.exports = class ResultService {
   }
 
   static eliminationStageResultHandler(data, identificator) {
-    if (identificator === "lose") {
-      return data
-        .map((match) => {
-          return Object.values(match)
-            .map((teamStats) => teamStats.status === "LOSE" && teamStats.team)
-            .filter((elem) => elem);
-        })
-        .flat();
-    }
-
     return data
       .map((match) => {
         return Object.values(match)
-          .map((teamStats) => teamStats.status === "WIN" && teamStats.team)
+          .map(
+            (teamStats) => teamStats.status === identificator && teamStats.team
+          )
           .filter((elem) => elem);
       })
       .flat();

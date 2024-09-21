@@ -40,12 +40,29 @@ exports.createTournament = (req, res) => {
     groupStageMatchResults
   );
 
-  const ranking = GroupStageRulesService.rankTeamsByGroup(
-    teamsGroupStageStats,
-    groupStageMatchResults
+  const groupATeamStats = teamsGroupStageStats.slice(0, 4);
+  const groupBTeamStats = teamsGroupStageStats.slice(4, 8);
+  const groupCTeamStats = teamsGroupStageStats.slice(8);
+
+  const groupARanking = GroupStageRulesService.rankTeamsByGroup(
+    groupATeamStats,
+    groupAMatchResults
   );
 
-  const bestNineTeams = RankingService.rankTeamsAfterGroupStage(ranking);
+  const groupBRanking = GroupStageRulesService.rankTeamsByGroup(
+    groupBTeamStats,
+    groupBMatchResults
+  );
+  const groupCRanking = GroupStageRulesService.rankTeamsByGroup(
+    groupCTeamStats,
+    groupCMatchResults
+  );
+
+  const bestNineTeams = RankingService.rankTeamsAfterGroupStage({
+    groupARanking,
+    groupBRanking,
+    groupCRanking,
+  });
 
   const poolD = PoolService.createPool(
     "D",
@@ -95,7 +112,11 @@ exports.createTournament = (req, res) => {
     groupAMatchResults,
     groupBMatchResults,
     groupCMatchResults,
-    ranking,
+    {
+      groupARanking,
+      groupBRanking,
+      groupCRanking,
+    },
     poolD.teams,
     poolE.teams,
     poolF.teams,
