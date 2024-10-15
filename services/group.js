@@ -17,21 +17,47 @@ module.exports = class GroupService {
   }
 
   static getPairs(teams) {
-    let rounds = teams.length - 1;
     let pairs = [];
 
-    for (let i = 1; i <= rounds; i++) {
-      let tempPair;
+    teams.map((team, index) => {
+      const pairsPerIteration = teams.length - 1 - index;
+      let tempPairs = [];
 
-      for (let j = i; j <= rounds; j++) {
-        tempPair = [teams[i - 1], teams[j]];
+      switch (pairsPerIteration) {
+        case 3:
+          tempPairs = [
+            [team, teams[index + 1]],
+            [team, teams[index + 2]],
+            [team, teams[index + 3]],
+          ];
+          break;
+        case 2:
+          tempPairs = [
+            [team, teams[index + 1]],
+            [team, teams[index + 2]],
+          ];
+          break;
+        case 1:
+          tempPairs = [[team, teams[index + 1]]];
+          break;
 
-        pairs.push(tempPair);
+        default:
+          break;
       }
-    }
 
-    this.setAllMatches(pairs);
+      pairs.push(tempPairs);
+    });
 
-    return [pairs[0], pairs[5], pairs[1], pairs[4], pairs[2], pairs[3]];
+    const flatPairs = pairs.flat();
+    this.setAllMatches(flatPairs);
+
+    return [
+      flatPairs[0],
+      flatPairs[5],
+      flatPairs[1],
+      flatPairs[4],
+      flatPairs[2],
+      flatPairs[3],
+    ];
   }
 };
